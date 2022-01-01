@@ -1,5 +1,4 @@
 ---
-styles: true
 ---
 
 $bodytype: (
@@ -24,9 +23,216 @@ $monospacetype: (
 ) !default;
 
 $headingColour: #6d6d6f !default;
-$bodyColour: #9d9a9a !default;
-$linkColour: #ffdab3 !default;
+$bodyColour: #999999 !default;
+$linkColour: #ffbb33 !default;
 
-   
+$rootsizes: (
+  rootsize-0: 8,   // 24px line-height body text
+  rootsize-1: 9,   // 28px line-height body text
+  rootsize-2: 10,   // 30px line-height body text
+  rootsize-3: 11,   // 34px line-height body text
+  rootsize-4: 12    // 38px line-height body text
+) !default;
+
+
 @import "alembic";
+
+// Advanced baseline magic.
+// ! Read the README to help understand what is going on here.
+// Parts based on https://gist.github.com/razwan/10662500
+@mixin baseline($fontsize, $font, $lineheight: 2, $below: 2, $breakpoint: 0) {
+  // Type of chosen variables.
+  $font-value: type-of($fontsize);
+  $break-value: type-of($breakpoint);
+
+  // Cap height
+  $cap-height: map-get($font, cap-height);
+
+  // Check if value exists in scale.
+  $in-scale: in-modular-scale(scale-0, $fontsize);
+
+  // Set the line-height (if it isn't set at 0).
+  @if $lineheight != 0 {
+    line-height: #{$lineheight}rem;
+  }
+
+  // If specifying a breakpoint to use (and breakpoint exists).
+  @if $break-value == number and $breakpoint <= ($breakpoints-limit - 1) and $breakpoint >= 0 {
+
+    // If using a number for fontsize.
+    @if $font-value == number {
+      $rootsize: nth($sizes, ($breakpoint + 1));
+      $baseline-shift: #{($fontsize / 2 * (($lineheight * $rootsize / $fontsize) - $cap-height)) / $rootsize + 0.00001};
+      $baseline-push: #{$below - (($fontsize / 2 * (($lineheight * $rootsize / $fontsize) - $cap-height)) / $rootsize + 0.00001)};
+
+      margin-bottom: #{$baseline-push}rem;
+      padding-top: #{$baseline-shift}rem;
+
+    // If using a variable from the scale for fontsize.
+    } @else if $in-scale == true {
+      $get-scale: map-get($modular-scale, scale-#{$breakpoint});
+      $get-size: map-get($get-scale, $fontsize);
+      $rootsize: nth($sizes, ($breakpoint + 1));
+
+      $baseline-shift: #{($get-size / 2 * (($lineheight * $rootsize / $get-size) - $cap-height)) / $rootsize + 0.00001};
+      $baseline-push: #{$below - (($get-size / 2 * (($lineheight * $rootsize / $get-size) - $cap-height)) / $rootsize + 0.00001)};
+
+      margin-bottom: #{$baseline-push}rem;
+      padding-top: #{$baseline-shift}rem;
+
+    } @else {
+      @warn "#{$fontsize} is not a valid scale variable";
+    }
+
+  // If want to use value for all breakpoints.
+  } @else if $breakpoint == all {
+
+    // If using a number for fontsize.
+    @if $font-value == number {
+      $rootsize: nth($sizes, 1);
+      $baseline-shift: #{($fontsize / 2 * (($lineheight * $rootsize / $fontsize) - $cap-height)) / $rootsize + 0.00001};
+      $baseline-push: #{$below - (($fontsize / 2 * (($lineheight * $rootsize / $fontsize) - $cap-height)) / $rootsize + 0.00001)};
+
+      margin-bottom: #{$baseline-push}rem;
+      padding-top: #{$baseline-shift}rem;
+
+      // Loop through breakpoints.
+      @for $i from 2 through $breakpoints-limit {
+        $rootsize: nth($sizes, $i);
+        $baseline-shift: #{($fontsize / 2 * (($lineheight * $rootsize / $fontsize) - $cap-height)) / $rootsize + 0.00001};
+        $baseline-push: #{$below - (($fontsize / 2 * (($lineheight * $rootsize / $fontsize) - $cap-height)) / $rootsize + 0.00001)};
+
+        @media screen and (min-width: nth($points, $i) / 16 * 1em ) {
+          margin-bottom: #{$baseline-push}rem;
+          padding-top: #{$baseline-shift}rem;
+        }
+      }
+
+    // If using a variable from the scale for fontsize.
+    } @else if $in-scale == true {
+      $get-scale: map-get($modular-scale, scale-0);
+      $get-size: map-get($get-scale, $fontsize);
+      $rootsize: nth($sizes, 1);
+
+      $baseline-shift: #{($get-size / 2 * (($lineheight * $rootsize / $get-size) - $cap-height)) / $rootsize + 0.00001};
+      $baseline-push: #{$below - (($get-size / 2 * (($lineheight * $rootsize / $get-size) - $cap-height)) / $rootsize + 0.00001)};
+
+      margin-bottom: #{$baseline-push}rem;
+      padding-top: #{$baseline-shift}rem;
+
+      // Loop through breakpoints.
+      @for $i from 2 through $breakpoints-limit {
+        $get-scale: map-get($modular-scale, scale-#{$i - 1});
+        $get-size: map-get($get-scale, $fontsize);
+        $rootsize: nth($sizes, $i);
+
+        $baseline-shift: #{($get-size / 2 * (($lineheight * $rootsize / $get-size) - $cap-height)) / $rootsize + 0.00001};
+        $baseline-push: #{$below - (($get-size / 2 * (($lineheight * $rootsize / $get-size) - $cap-height)) / $rootsize + 0.00001)};
+
+        @media screen and (min-width: nth($points, $i) / 16 * 1em ) {
+          margin-bottom: #{$baseline-push}rem;
+          padding-top: #{$baseline-shift}rem;
+        }
+      }
+
+    } @else {
+      @warn "#{$fontsize} is not a valid scale variable";
+    }
+
+  } @else {
+    @warn "#{$breakpoint} is not valid to use as a breakpoint";
+  }
+}
+
+$modular-scale: (
+  // Major Third http://www.modularscale.com/?16,28&px&1.25&web&text
+  scale-0: (
+    alpha:   28.0,
+    beta:    25.0,
+    gamma:   22.4,
+    delta:   20.0,
+    epsilon: 17.9,
+    zeta:    16.0,
+    eta:     14.3,
+    theta:   12.8,
+    iota:    11.5
+  ),
+  // Major Third http://www.modularscale.com/?17,30&px&1.25&web&text
+  scale-1: (
+    alpha:   30.0,
+    beta:    26.6,
+    gamma:   24.0,
+    delta:   21.3,
+    epsilon: 19.2,
+    zeta:    17.0,
+    eta:     15.3,
+    theta:   13.6,
+    iota:    12.8
+  ),
+  // Major Third http://www.modularscale.com/?18,32&px&1.25&web&text
+  scale-2: (
+    alpha:   32.0,
+    beta:    28.1,
+    gamma:   25.6,
+    delta:   22.5,
+    epsilon: 20.5,
+    zeta:    18.0,
+    eta:     16.3,
+    theta:   14.4,
+    iota:    13.1
+  ),
+  // Perfect Fourth http://www.modularscale.com/?20,40&px&1.333&web&text
+  scale-3: (
+    alpha:   40.0,
+    beta:    35.5,
+    gamma:   30.0,
+    delta:   26.7,
+    epsilon: 22.5,
+    zeta:    5.0,
+    eta:     16.9,
+    theta:   15.0,
+    iota:    12.7
+  ),
+  // Aug. Fourth http://www.modularscale.com/?22,50&px&1.414&web&text
+  scale-4: (
+    alpha:   50.0,
+    beta:    43.9,
+    gamma:   35.3,
+    delta:   31.1,
+    epsilon: 25.0,
+    zeta:    22.0,
+    eta:     17.6,
+    theta:   15.6,
+    iota:    12.5
+  )
+);
+
+
+.typeset {
+  p {
+
+    @include baseline($fontsize: zeta, $font: $bodytype, $lineheight: 3, $below: 3, $breakpoint: all);
+    font-feature-settings: 'kern', 'onum', 'liga';
+  }
+
+  h1, .alpha {
+    @include sassline($fontsize: alpha, $font: $headingtype, $lineheight: 4.5, $below: 2, $breakpoint: all);
+  }
+
+  // Heading level 2.
+  h2, .beta {
+    @include sassline(beta, $headingtype, 4, 1, all);
+  }
+
+
+  // Heading level 4.
+  h4, .delta {
+    @include sassline(delta, $headingtype, 3, 2, all);
+  }
+
+  // Heading level 5.
+  h5, .epsilon {
+    @include sassline(epsilon, $headingtype, 3, 1, all);
+  }
+}
 
