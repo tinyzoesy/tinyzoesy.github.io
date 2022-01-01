@@ -1,5 +1,5 @@
 ---
-title: About this website
+title: Welcome to my cyber space
 ---
 
-I'm not sure yet what this website is about, but I'm sure I'll work it out soon.
+And to make an end is to make a beginning.
