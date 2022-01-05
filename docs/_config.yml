@@ -21,12 +21,22 @@ plugins:
 - jekyll-remote-theme
 
 # Site settings
-url: 'https://mydomain.com'
+url: 'https://tinyzoesy.github.io'
 baseurl: ''
 title: 'Tiny Loafer'
 description: 'Beautiful world, where are you'
 permalink: pretty
-# logo: "https://www.gravatar.com/avatar/6c0377abcf4da91cdd35dea4554b2a4c?s=52"
+logo: "/assets/logo.png"
+
+favicons: # Favicons are also used in the manifest file. Syntax is 'size: path'
+  16: '/assets/logo.png'
+  32: '/assets/logo.png'
+  96: '/assets/logo.png'
+  120: '/assets/logo.png'
+  144: '/assets/logo.png'
+  180: '/assets/logo.png'
+  512: '/assets/logo.png'
+  1024: '/assets/logo.png'
 
 # Pagination
 paginate: 5
@@ -43,8 +53,8 @@ navigation_header:
 
 # Footer nav
 navigation_footer:
-- title: Back to top
-  url: "#top"
+- title: Powered by Jeklly, Alembic
+  url: https://github.com/daviddarnes/alembic
 
 # Collections
 collections:
@@ -70,6 +80,8 @@ defaults:
       type: "pages"
     values:
       layout: page # Set the default layout for pages
+      
+email: "zouvra@gmail.com"
 
 
 fonts:
